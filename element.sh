@@ -1,18 +1,41 @@
 #!/bin/bash
 
-# setup initial PSQL sql server access
+#   Periodic Table Lookup
+#   How to use:
+#   In the bash cli, type './element.sh' and press enter.
+#   If there is no argument, the script will show:
+#       'Please provide an element as an argument.'
+#   If you add the atomic number of the element, or the symbol, or the 
+#   name, it will display the information for the element.
+#   For example, the following arguments are accepted:
+#
+#       ./element.sh 1
+#       ./element.sh H
+#       ./element.sh Hydrogen
+#
+#   It's case insensitive and can also accept the following:
+#
+#       ./element.sh hE
+#       ./element.sh hELiUm
+#
+#   If the element is not in the database, it will display the following:
+#
+#       'I could not find that element in the database.'
+#
+
+# Setup initial PSQL sql server access
 
 PSQL="psql -X --username=freecodecamp --dbname=periodic_table  --tuples-only -c"
 
 SQL_QUERY="SELECT elements.atomic_number, elements.symbol, elements.name, properties.atomic_mass, properties.melting_point_celsius, properties.boiling_point_celsius, types.type FROM elements INNER JOIN properties using(atomic_number) INNER JOIN types USING(type_id)"
 
-# if null argument
+# If null argument
 
 if [[ -z $1 ]]; then
   echo "Please provide an element as an argument."
 else
 
-# arguments for lookup
+# Arguments for lookup
 
   if [[ $1 =~ ^[0-9]+$ ]]; then
     GET_ELEMENT=$($PSQL "$SQL_QUERY WHERE atomic_number = $1")
@@ -22,7 +45,7 @@ else
     GET_ELEMENT=$($PSQL "$SQL_QUERY WHERE name = INITCAP(LOWER('$1'))")
   fi
  
-# display element details
+# Display element details
 
  if [[ -z $GET_ELEMENT ]]; then
     echo "I could not find that element in the database."
