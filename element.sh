@@ -11,6 +11,9 @@ SQL_QUERY="SELECT elements.atomic_number, elements.symbol, elements.name, proper
 if [[ -z $1 ]]; then
   echo "Please provide an element as an argument."
 else
+
+# arguments for lookup
+
   if [[ $1 =~ ^[0-9]+$ ]]; then
     GET_ELEMENT=$($PSQL "$SQL_QUERY WHERE atomic_number = $1")
   elif [[ ${#1} -lt 3 && $1 =~ [a-zA-Z] ]]; then
@@ -18,6 +21,16 @@ else
   elif [[ ${#1} -gt 2 && $1 =~ [a-zA-Z] ]]; then
     GET_ELEMENT=$($PSQL "$SQL_QUERY WHERE name = INITCAP(LOWER('$1'))")
   fi
-  echo $GET_ELEMENT
  
+# display element details
+
+ if [[ -z $GET_ELEMENT ]]; then
+    echo "I could not find that element in the database."
+  else
+    echo "$GET_ELEMENT" | while read ATOMIC_NO BAR SYMBOL BAR NAME BAR ATOMIC_MASS BAR MELTING_POINT BAR BOILING_POINT BAR TYPE
+    do
+      echo "The element with atomic number $ATOMIC_NO is $NAME ($SYMBOL). It's a $TYPE, with a mass of $ATOMIC_MASS amu. $NAME has a melting point of $MELTING_POINT celsius and a boiling point of $BOILING_POINT celsius."
+    done
+  fi
+
 fi
